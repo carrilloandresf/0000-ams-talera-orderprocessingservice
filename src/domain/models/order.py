@@ -1,13 +1,16 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional, List
-from . .value_objects.order_status import OrderStatus
+from typing import List, Optional
+
+from ..value_objects.order_status import OrderStatus
+
 
 @dataclass
 class OrderItem:
     sku: str
     quantity: int
     unit_price: float
+
 
 @dataclass
 class Order:
