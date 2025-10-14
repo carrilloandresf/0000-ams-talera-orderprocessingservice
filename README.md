@@ -10,20 +10,64 @@ Servicio de ejemplo para procesamiento de órdenes en un contexto serverless y e
 
 ## ▶️ Cómo ejecutar el proyecto localmente
 
-1. Crear y activar un entorno virtual.
-2. Instalar dependencias: `pip install -r requirements.txt`.
-3. Definir variables de entorno (o crear un `.env`) con credenciales de MongoDB. Valores por defecto:
-   ```env
-   MONGO_HOST=localhost
-   MONGO_PORT=27017
-   MONGO_DB=orders_db
-   MONGO_USER=root
-   MONGO_PASSWORD=secret
-   MONGO_AUTH_SOURCE=admin
-   LOG_LEVEL=INFO
-   ```
-4. Ejecutar la aplicación: `uvicorn src.main:app --reload --host 0.0.0.0 --port 8000`.
-5. Visitar `http://localhost:8000/docs` para la documentación interactiva generada automáticamente (Swagger UI).
+### 1. Crear y activar un entorno virtual
+
+El proyecto requiere Python 3.12 o superior. Utiliza la siguiente guía según tu sistema operativo:
+
+| Sistema | Comando para crear el entorno | Comando para activarlo |
+| --- | --- | --- |
+| **macOS / Linux (bash/zsh)** | `python3 -m venv .venv` | `source .venv/bin/activate` |
+| **Windows (PowerShell)** | `py -m venv .venv` | `.venv\\Scripts\\Activate.ps1` |
+| **Windows (CMD)** | `py -m venv .venv` | `.venv\\Scripts\\activate.bat` |
+
+> 💡 Si deseas desactivar el entorno virtual ejecuta `deactivate`.
+
+### 2. Instalar dependencias
+
+Con el entorno virtual activo:
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 3. Configurar variables de entorno
+
+Define las credenciales de MongoDB (directamente en tu shell, archivo `.env` o variables del sistema). Valores por defecto:
+
+```env
+MONGO_HOST=localhost
+MONGO_PORT=27017
+MONGO_DB=orders_db
+MONGO_USER=root
+MONGO_PASSWORD=secret
+MONGO_AUTH_SOURCE=admin
+LOG_LEVEL=INFO
+```
+
+### 4. Ejecutar la aplicación
+
+Con el entorno activo y las variables configuradas, inicia el servidor de desarrollo:
+
+```bash
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Después abre `http://localhost:8000/docs` para explorar la documentación interactiva (Swagger UI) y probar los endpoints.
+
+### 5. Atajos mediante Makefile
+
+Este repositorio incluye un `Makefile` que automatiza los pasos anteriores en sistemas macOS/Linux:
+
+```bash
+make venv        # Crea el entorno virtual
+make install     # Instala dependencias en el entorno
+make run         # Inicia el servidor de desarrollo
+make test        # Ejecuta las pruebas (pytest)
+make clean       # Elimina artefactos temporales y el entorno virtual
+```
+
+En Windows puedes ejecutar estos comandos dentro de Git Bash o WSL. Si prefieres PowerShell/CMD, realiza manualmente los pasos descritos en las secciones anteriores.
 
 ### Ejecutar con Docker
 
