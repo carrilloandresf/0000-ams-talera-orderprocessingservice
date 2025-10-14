@@ -1,33 +1,39 @@
+SHELL := /bin/bash
+
 PYTHON ?= python3
 VENV_DIR ?= .venv
-ACTIVATE := . $(VENV_DIR)/bin/activate
+
+PIP := $(VENV_DIR)/bin/pip
+PY := $(VENV_DIR)/bin/python
+UVICORN := $(VENV_DIR)/bin/uvicorn
 
 .PHONY: venv install run test clean docker-build docker-up docker-down
 
 venv:
-$(PYTHON) -m venv $(VENV_DIR)
+	$(PYTHON) -m venv $(VENV_DIR)
 
 install: venv
-$(ACTIVATE) && pip install --upgrade pip
-$(ACTIVATE) && pip install -r requirements.txt
+	$(PIP) install --upgrade pip
+	$(PIP) install -r requirements.txt
 
 run:
-$(ACTIVATE) && uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+	$(UVICORN) src.main:app --reload --host 0.0.0.0 --port 8000
 
 test:
-$(ACTIVATE) && pytest
+	$(VENV_DIR)/bin/pytest -q
 
 clean:
-rm -rf $(VENV_DIR)
-rm -rf __pycache__ */__pycache__
+	rm -rf $(VENV_DIR)
+	find . -type d -name "__pycache__" -exec rm -rf {} +
 
 # Utilidades adicionales
 
 docker-build:
-docker build -t order-processing-service .
+	docker build -t order-processing-service .
 
+# En Docker Desktop moderno es "docker compose", no "docker-compose"
 docker-up:
-docker-compose up --build
+	docker compose up --build
 
 docker-down:
-docker-compose down
+	docker compose down
