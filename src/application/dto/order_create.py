@@ -7,4 +7,4 @@ class OrderItemIn(BaseModel):
 
 class OrderCreateIn(BaseModel):
     customer_id: str = Field(min_length=1)
-    items: conlist(OrderItemIn, min_items=1)
+    items: conlist(OrderItemIn, min_length=1)
