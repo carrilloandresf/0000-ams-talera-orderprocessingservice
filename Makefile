@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-PYTHON ?= python3
+PYTHON ?= /opt/homebrew/bin/python3.11
 VENV_DIR ?= .venv
 
 PIP := $(VENV_DIR)/bin/pip
