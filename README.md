@@ -71,6 +71,16 @@ En Windows puedes ejecutar estos comandos dentro de Git Bash o WSL. Si prefieres
 
 ### Ejecutar con Docker
 
+#### Docker Compose (recomendado)
+
+```bash
+docker compose up --build
+```
+
+Esto levantará automáticamente el servicio FastAPI y un contenedor de MongoDB inicializado con las credenciales definidas en `docker-compose.yml`. La API quedará disponible en `http://localhost:8000` y MongoDB en `mongodb://root:secret@localhost:27017`.
+
+#### Docker (manual)
+
 ```bash
 docker build -t order-processing-service .
 docker run --rm -p 8000:8000 \
