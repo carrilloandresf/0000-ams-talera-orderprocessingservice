@@ -7,7 +7,9 @@ from typing import Optional
 
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorCollection
+from pymongo.errors import PyMongoError
 
+from ...core.errors import ServiceUnavailableError
 from ...domain.models.order import Order, OrderItem
 from ...domain.ports.order_repository import OrderRepository
 from ...domain.value_objects.order_status import OrderStatus
@@ -48,16 +50,36 @@ class OrderRepositoryMongo(OrderRepository):
     async def create(self, order: Order) -> Order:
         logger.info("Persisting new order", extra={"customer_id": order.customer_id})
         payload = _to_document(order)
-        result = await self._collection.insert_one(payload)
+        try:
+            result = await self._collection.insert_one(payload)
+        except PyMongoError as exc:
+            logger.error(
+                "Failed to insert order", exc_info=exc, extra={"customer_id": order.customer_id}
+            )
+            raise ServiceUnavailableError("Database unavailable") from exc
         logger.debug("Order persisted", extra={"order_id": str(result.inserted_id)})
-        doc = await self._collection.find_one({"_id": result.inserted_id})
+        try:
+            doc = await self._collection.find_one({"_id": result.inserted_id})
+        except PyMongoError as exc:
+            logger.error(
+                "Failed to retrieve inserted order",
+                exc_info=exc,
+                extra={"order_id": str(result.inserted_id)},
+            )
+            raise ServiceUnavailableError("Database unavailable") from exc
         return _to_domain(doc)
 
     async def get_by_id(self, order_id: str) -> Optional[Order]:
         if not ObjectId.is_valid(order_id):
             logger.warning("Invalid ObjectId received", extra={"order_id": order_id})
             return None
-        doc = await self._collection.find_one({"_id": ObjectId(order_id)})
+        try:
+            doc = await self._collection.find_one({"_id": ObjectId(order_id)})
+        except PyMongoError as exc:
+            logger.error(
+                "Failed to retrieve order", exc_info=exc, extra={"order_id": order_id}
+            )
+            raise ServiceUnavailableError("Database unavailable") from exc
         if doc:
             logger.debug("Order retrieved", extra={"order_id": order_id})
             return _to_domain(doc)
@@ -70,11 +92,19 @@ class OrderRepositoryMongo(OrderRepository):
             return None
 
         now = datetime.utcnow()
-        doc = await self._collection.find_one_and_update(
-            {"_id": ObjectId(order_id)},
-            {"$set": {"status": status.value, "updated_at": now}},
-            return_document=True,
-        )
+        try:
+            doc = await self._collection.find_one_and_update(
+                {"_id": ObjectId(order_id)},
+                {"$set": {"status": status.value, "updated_at": now}},
+                return_document=True,
+            )
+        except PyMongoError as exc:
+            logger.error(
+                "Failed to update order status",
+                exc_info=exc,
+                extra={"order_id": order_id, "status": status.value},
+            )
+            raise ServiceUnavailableError("Database unavailable") from exc
 
         if not doc:
             logger.info("Order not found for status update", extra={"order_id": order_id})
