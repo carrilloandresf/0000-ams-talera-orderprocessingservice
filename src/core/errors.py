@@ -25,11 +25,16 @@ class BadRequestError(DomainError):
     """Raised when the input data is invalid."""
 
 
+class ServiceUnavailableError(DomainError):
+    """Raised when downstream dependencies are unavailable."""
+
+
 async def domain_error_handler(_: Request, exc: DomainError) -> JSONResponse:
     code_map = {
         NotFoundError: status.HTTP_404_NOT_FOUND,
         ConflictError: status.HTTP_409_CONFLICT,
         BadRequestError: status.HTTP_400_BAD_REQUEST,
+        ServiceUnavailableError: status.HTTP_503_SERVICE_UNAVAILABLE,
         DomainError: status.HTTP_422_UNPROCESSABLE_ENTITY,
     }
     for cls, code in code_map.items():
